@@ -4,7 +4,7 @@ from pxr import UsdGeom
 
 from omni.ui_scene import scene as sc
 import omni.usd
-
+from pxr import Gf
 
 class ObjInfoModel(sc.AbstractManipulatorModel):
     """
@@ -103,6 +103,24 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         z_Pos = (bboxMin[2] + bboxMax[2]) * 0.5
         position = [x_Pos, y_Pos, z_Pos]
         return position
+
+    def set_relative_position(self, x_incr, y_incr):
+        stage = self.usd_context.get_stage()
+        if not stage or self.current_path == "":
+            return 
+
+        # Get position directly from USD
+        prim = stage.GetPrimAtPath(self.current_path)
+        pos = self.position.value
+
+        loc = prim.GetAttribute("xformOp:translate") # VERY IMPORTANT: change to translate to make it translate instead of scale
+        new_loc = [pos[0] + y_incr, pos[1], pos[2] + x_incr]
+        
+        loc.Set(Gf.Vec3d(new_loc[0], new_loc[1], new_loc[2])) # ALSO VERY IMPORTANT
+        self.position.value = new_loc
+        return new_loc
+
+        
 
      # loop through all notices that get passed along until we find selected
     def notice_changed(self, notice: Usd.Notice, stage: Usd.Stage) -> None:
