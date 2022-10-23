@@ -33,21 +33,22 @@ class ObjectInfoWidget(omni.ext.IExt):
                     ui.Button("Right", clicked_fn=lambda: self.set_pos("RIGHT"))
                 ui.Label("Change Step Size", alignment=ui.Alignment.CENTER_TOP, style={"margin": 5})
                 ui.IntSlider(self._step_size_model)
-                # ui.Button("Start keyboard input", clicked_fn = lambda: self.start_inp())
+                ui.Button("Start keyboard input", clicked_fn = lambda: self.start_inp())
         self.subscribe_sliders()
 
 
 
-    # def start_inp(self):
-    #     appwindow = omni.appwindow.get_default_app_window()
-    #     keyboard = appwindow.get_keyboard()
-    #     def on_input(e):
-    #         print("{} ({})".format(e.input, e.type))
-    #         return True
+    def start_inp(self):
+        appwindow = omni.appwindow.get_default_app_window()
+        keyboard = appwindow.get_keyboard()
+        def on_input(e):
+            print("{} ({})".format(e.input, e.type))
+            self.pos_label.text = "{} ({})".format(e.input, e.type)
+            return True
 
 
-    #     self.input = carb.input.acquire_input_interface()
-    #     keyboard_sub_id = input.subscribe_to_keyboard_events(keyboard, on_input)
+        self.input = carb.input.acquire_input_interface()
+        keyboard_sub_id = self.input.subscribe_to_keyboard_events(keyboard, on_input)
         
 
 
