@@ -34,22 +34,30 @@ class ObjectInfoWidget(omni.ext.IExt):
                 ui.Label("Change Step Size", alignment=ui.Alignment.CENTER_TOP, style={"margin": 5})
                 ui.IntSlider(self._step_size_model)
                 ui.Button("Start keyboard input", clicked_fn = lambda: self.start_inp())
+                ui.Button("Stop keyboard input", clicked_fn = lambda: self.unsubscribe_inp())
         self.subscribe_sliders()
 
 
 
     def start_inp(self):
         appwindow = omni.appwindow.get_default_app_window()
-        keyboard = appwindow.get_keyboard()
+        self.keyboard = appwindow.get_keyboard()
         def on_input(e):
+            if e.type == carb.input.KeyboardEventType.KEY_PRESS:
+                if e.input == carb.input.KeyboardInput.UP:
+                    self.set_pos("UP") # TODO: right now, the problem is that it deselects the current object when you press a key. change this.
+
             print("{} ({})".format(e.input, e.type))
-            self.pos_label.text = "{} ({})".format(e.input, e.type)
             return True
 
 
         self.input = carb.input.acquire_input_interface()
-        keyboard_sub_id = self.input.subscribe_to_keyboard_events(keyboard, on_input)
-        
+        keyboard_sub_id = self.input.subscribe_to_keyboard_events(self.keyboard, on_input)
+    
+    def unsubscribe_inp(self):
+        if self.input and self.keyboard:
+            self.input.unsubscribe_to_keyboard_events() # TODO: figure out the args in this
+            self.input = None
 
 
     def subscribe_sliders(self):
@@ -102,7 +110,6 @@ class ObjectInfoWidget(omni.ext.IExt):
         self._slider_subscription.unsubscribe()
         self._step_subscription.unsubscribe()
         if self.input:
-            self.input.unsubscribe()
             self.input = None
         self._slider_subscription = None
         self._step_subscription = None
