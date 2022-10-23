@@ -63,6 +63,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
             self.prim = prim
             self.current_path = prim_path[0]
+            self.position.value = self.get_position()
 
             # Position is changed because new selected object has a different position
             self._item_changed(self.position)
@@ -84,25 +85,15 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         return []
 
     def get_position(self):
-        """Returns position of currently selected object"""
         stage = self.usd_context.get_stage()
         if not stage or self.current_path == "":
-            return [0, 0, 0]
+            return 
 
         # Get position directly from USD
         prim = stage.GetPrimAtPath(self.current_path)
-        box_cache = UsdGeom.BBoxCache(Usd.TimeCode.Default(), includedPurposes=[UsdGeom.Tokens.default_])
-        bound = box_cache.ComputeWorldBound(prim)
-        range = bound.ComputeAlignedBox()
-        bboxMin = range.GetMin()
-        bboxMax = range.GetMax()
 
-        # Find the top center of the bounding box and add a small offset upward.
-        x_Pos = (bboxMin[0] + bboxMax[0]) * 0.5
-        y_Pos = bboxMax[1] + 5
-        z_Pos = (bboxMin[2] + bboxMax[2]) * 0.5
-        position = [x_Pos, y_Pos, z_Pos]
-        return position
+        loc = prim.GetAttribute("xformOp:translate") # VERY IMPORTANT: change to translate to make it translate instead of scale
+        return loc.Get()
 
     def set_relative_position(self, x_incr, y_incr):
         stage = self.usd_context.get_stage()
@@ -111,13 +102,12 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
 
         # Get position directly from USD
         prim = stage.GetPrimAtPath(self.current_path)
-        pos = self.position.value
+        pos = self.get_position()
 
         loc = prim.GetAttribute("xformOp:translate") # VERY IMPORTANT: change to translate to make it translate instead of scale
         new_loc = [pos[0] + y_incr, pos[1], pos[2] + x_incr]
         
         loc.Set(Gf.Vec3d(new_loc[0], new_loc[1], new_loc[2])) # ALSO VERY IMPORTANT
-        self.position.value = new_loc
         return new_loc
 
         
@@ -127,7 +117,7 @@ class ObjInfoModel(sc.AbstractManipulatorModel):
         """Called by Tf.Notice.  Used when the current selected object changes in some way."""
         for p in notice.GetChangedInfoOnlyPaths():
             if self.current_path in str(p.GetPrimPath()):
-                self._item_changed(self.position)
+                pass
 
     def destroy(self):
         self.events = None
