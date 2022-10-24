@@ -44,19 +44,25 @@ class ObjectInfoWidget(omni.ext.IExt):
         self.keyboard = appwindow.get_keyboard()
         def on_input(e):
             if e.type == carb.input.KeyboardEventType.KEY_PRESS:
-                if e.input == carb.input.KeyboardInput.UP:
+                if e.input == carb.input.KeyboardInput.W or e.input == carb.input.KeyboardInput.UP:
                     self.set_pos("UP") # TODO: right now, the problem is that it deselects the current object when you press a key. change this.
-
+                if e.input == carb.input.KeyboardInput.S or e.input == carb.input.KeyboardInput.DOWN:
+                    self.set_pos("DOWN")
+                if e.input == carb.input.KeyboardInput.D or e.input == carb.input.KeyboardInput.RIGHT:
+                    self.set_pos("RIGHT")                
+                if e.input == carb.input.KeyboardInput.A or e.input == carb.input.KeyboardInput.LEFT:
+                    self.set_pos("LEFT")
             print("{} ({})".format(e.input, e.type))
             return True
 
 
         self.input = carb.input.acquire_input_interface()
-        keyboard_sub_id = self.input.subscribe_to_keyboard_events(self.keyboard, on_input)
+        self.keyboard_sub_id = self.input.subscribe_to_keyboard_events(self.keyboard, on_input)
     
     def unsubscribe_inp(self):
+        print(self.keyboard_sub_id)
         if self.input and self.keyboard:
-            self.input.unsubscribe_to_keyboard_events() # TODO: figure out the args in this
+            self.input.unsubscribe_to_keyboard_events(self.keyboard, 1) # TODO: figure out the args in this
             self.input = None
 
 
