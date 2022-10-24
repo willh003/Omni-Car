@@ -97,13 +97,13 @@ class ObjectInfoWidget(omni.ext.IExt):
 
     def set_pos(self, flag):
         if self.model:
-            if flag == "LEFT":
+            if flag == "DOWN":
                 self.model.set_relative_position(x_incr = self.step_size, y_incr=0)
-            elif flag == "UP":
+            elif flag == "LEFT":
                 self.model.set_relative_position(x_incr = 0, y_incr=-1*self.step_size)
-            elif flag == "DOWN":
-                self.model.set_relative_position(x_incr = 0, y_incr=self.step_size)
             elif flag == "RIGHT":
+                self.model.set_relative_position(x_incr = 0, y_incr=self.step_size)
+            elif flag == "UP":
                 self.model.set_relative_position(x_incr = -1*self.step_size, y_incr=0)
 
     def get_pos(self):
